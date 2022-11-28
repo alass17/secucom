@@ -16,12 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.security.RolesAllowed;
 import java.security.Principal;
 import java.util.Map;
+import java.util.logging.Logger;
 
 
 @RestController
     public class LoginController{
     @Autowired
   private   OAuth2AuthorizedClientService authorizedClientService;
+    private static final Logger LOG = Logger.getLogger(LoginController.class.getName());
 
 //        @RolesAllowed("USER")
 //        @RequestMapping("/**")
@@ -80,13 +82,18 @@ import java.util.Map;
             Map<String,Object> userAttributes = ((DefaultOAuth2User) authToken.getPrincipal()).getAttributes();
 
             String userToken = authClient.getAccessToken().getTokenValue();
+            LOG.info("Bienvenu" + userAttributes.get("name")+"<br><br>");
+            LOG.info("e-mail: " + userAttributes.get("email")+"<br><br>");
+
             protectedInfo.append("Welcome, " + userAttributes.get("name")+"<br><br>");
             protectedInfo.append("e-mail: " + userAttributes.get("email")+"<br><br>");
             OidcIdToken idToken = getIdToken(principal);
+            LOG.info("Access Token: " + userToken+"<br><br>");
             protectedInfo.append("Access Token: " + userToken+"<br><br>");
             if(idToken != null) {
-
+                LOG.info("idToken value: " + idToken.getTokenValue()+"<br><br>");
                 protectedInfo.append("idToken value: " + idToken.getTokenValue()+"<br><br>");
+                LOG.info("Token mapped values <br><br>");
                 protectedInfo.append("Token mapped values <br><br>");
 
                 Map<String, Object> claims = idToken.getClaims();

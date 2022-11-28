@@ -3,9 +3,11 @@ package com.secucom.spring.login.controllers;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
+
 
 import com.secucom.spring.login.models.Role;
 import com.secucom.spring.login.models.User;
@@ -38,6 +40,8 @@ import com.secucom.spring.login.repository.RoleRepository;
 public class AuthController {
   @Autowired
   AuthenticationManager authenticationManager;
+  private static final Logger LOG = Logger.getLogger(AuthController.class.getName());
+
 
   @Autowired
   UserRepository userRepository;
@@ -75,11 +79,13 @@ public class AuthController {
   @PostMapping("/signup")
   public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
     if (userRepository.existsByUsername(signUpRequest.getUsername())) {
+      LOG.info("L'utilisateur "+signUpRequest.getUsername()+" est déjà pris!");
       return ResponseEntity.badRequest().body(new MessageResponse("Error: Cet utilisateur est déjà pris!"));
     }
 
     if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-      return ResponseEntity.badRequest().body(new MessageResponse("Error: Cet utilisateur est déjà pris!"));
+      LOG.info("L'email "+signUpRequest.getEmail()+" est déjà pris!");
+      return ResponseEntity.badRequest().body(new MessageResponse("Error: Cet email est déjà pris!"));
     }
 
     // Create new user's account
@@ -91,6 +97,7 @@ public class AuthController {
     Set<Role> roles = new HashSet<>();
 
     if (strRoles == null) {
+      LOG.info("Role non fourni");
       Role userRole = roleRepository.findByName(ERole.ROLE_USER)
           .orElseThrow(() -> new RuntimeException("Error: Role n'est pas fournit."));
       roles.add(userRole);
@@ -98,18 +105,21 @@ public class AuthController {
       strRoles.forEach(role -> {
         switch (role) {
         case "admin":
+          LOG.info("Role non fourni");
           Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
               .orElseThrow(() -> new RuntimeException("Error:Role n'est pas fournit.."));
           roles.add(adminRole);
 
           break;
-        case "mod":
-          Role modRole = roleRepository.findByName(ERole.ROLE_COLLABORATEUR)
+        case "col":
+          LOG.info("Role non fourni");
+          Role colRole = roleRepository.findByName(ERole.ROLE_COLLABORATEUR)
               .orElseThrow(() -> new RuntimeException("Error: Role n'est pas fournit."));
-          roles.add(modRole);
+          roles.add(colRole);
 
           break;
         default:
+          LOG.info("Role non fourni");
           Role userRole = roleRepository.findByName(ERole.ROLE_USER)
               .orElseThrow(() -> new RuntimeException("Error: Role n'est pas fournit."));
           roles.add(userRole);
@@ -119,7 +129,7 @@ public class AuthController {
 
     user.setRoles(roles);
     userRepository.save(user);
-
+    LOG.info("Utilisateur "+signUpRequest.getUsername()+" enregistré avec succès!");
     return ResponseEntity.ok(new MessageResponse("Utilisateur enregistré avec succès!"));
   }
 

@@ -11,12 +11,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
+import java.util.logging.Logger;
 
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/test")
 public class TestController {
+  private static final Logger LOG = Logger.getLogger(AuthController.class.getName());
   @Autowired
   private UserRepository userRepository;
   @Autowired
@@ -27,25 +29,31 @@ public class TestController {
 
     String user = "NOM D'UTILISATEUR: " + userRepository.findByUsername(all.getName()).get().getUsername() + "  EMAIL:  "+
             userRepository.findByUsername(all.getName()).get().getEmail();
-    return "Bienvenue, " + user;
+    LOG.info("Bienvenue, " + user);
+    return "Bienvenue " +userRepository.findByUsername(all.getName()).get().getUsername();
   }
 
   @GetMapping("/user")
   @PreAuthorize("hasRole('USER') or hasRole('COLLABORATEUR') or hasRole('ADMIN')")
   public String userAccess(Principal user) {
+    LOG.info("Bienvenue, " + userRepository.findByUsername(user.getName()).get().getUsername() +
+            roleRepository.findByName(ERole.ROLE_USER).get().getName());
     return "Bienvenue, " + userRepository.findByUsername(user.getName()).get().getUsername() +
             roleRepository.findByName(ERole.ROLE_USER).get().getName();
   }
 
-  @GetMapping("/mod")
+  @GetMapping("/col")
   @PreAuthorize("hasRole('COLLABORATEUR')")
-  public String moderatorAccess() {
+  public String collaborateurAccess() {
+    LOG.info("Bienvenu collaborateur.");
     return "Bienvenu collaborateur.";
   }
 
   @GetMapping("/admin")
   @PreAuthorize("hasRole('ADMIN')")
   public String adminAccess(Principal admin) {
+    LOG.info("Bienvenue " + " "+ userRepository.findByUsername(admin.getName()).get().getUsername()  + " "+
+            roleRepository.findByName(ERole.ROLE_ADMIN).get().getName());
     return "Bienvenue " + " "+ userRepository.findByUsername(admin.getName()).get().getUsername()  + " "+
             roleRepository.findByName(ERole.ROLE_ADMIN).get().getName();
   }

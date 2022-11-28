@@ -7,8 +7,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 public class UserController {
+    private static final Logger LOG = Logger.getLogger(AuthController.class.getName());
     @Autowired
     private UserService usersCrud;
 
@@ -18,6 +20,7 @@ public class UserController {
     @PreAuthorize("hasRole('USER') or hasRole('MODERATOR') or hasRole('ADMIN')")
     @GetMapping("/afficher")
     public List<User> AfficherUsers(){
+        LOG.info("usersCrud.Afficher()");
         return usersCrud.Afficher();
     }
 
@@ -27,6 +30,7 @@ public class UserController {
     public String ModierUser(@RequestBody User users){
 
         usersCrud.Modifier(users);
+        LOG.info("Modification reussie avec succès");
         return "Modification reussie avec succès";
     }
 
@@ -34,6 +38,7 @@ public class UserController {
     @DeleteMapping("/Supprimer/{id_users}")
     public String Supprimer(@PathVariable("id_users") Long id_users){
         usersCrud.Supprimer(id_users);
+        LOG.info("Suppression reussie");
         return "Suppression reussie";
     }
 
